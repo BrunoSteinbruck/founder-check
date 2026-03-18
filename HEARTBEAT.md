@@ -18,12 +18,13 @@ Before anything else, verify that at least one supported X data source is availa
 - X API
 - Apify
 
-Preferred Apify Actor for X data:
+#### Apify Actor Priority
 
-- `apify/twitter-scraper` (primary)
-- `quacker/twitter-scraper` (fallback)
+- `xtdata/twitter-x-scraper` (primary)
+- `apify/twitter-scraper` (first fallback)
+- `quacker/twitter-scraper` (second fallback)
 
-Do not use generic web browser collectors for X. They are commonly blocked or degraded. Use only dedicated X/Twitter Actors.
+Do not use web browser collectors for X. They are commonly blocked or degraded. Use only dedicated X/Twitter Actors.
 
 If both are unavailable, stop immediately. Do not continue with social inference from web search alone.
 
@@ -50,17 +51,19 @@ If the user provides only a contract address, attempt social resolution first. I
 
 For `CA` input:
 
-1. Query DexScreener or equivalent token metadata source for `x`, `telegram`, `website`, and related links.
-2. If X handles exist there, treat them as candidate official accounts, not guaranteed founders.
-3. If socials are missing, inspect the official website, docs, link hub, Telegram pinned posts, and launch thread.
-4. If no credible handle can be resolved, stop early with a limited result and ask for manual handles.
+1. Step A: query DexScreener for token socials and links.
+2. If Step A does not return a usable X handle, Step B: query Jupiter for token socials and links.
+3. If Step B does not return a usable X handle, Step C: search X directly for the contract address string.
+4. Stop at the first step that returns a usable handle.
+5. Do not continue into websites, docs, or general web research after the handle is resolved. Those come later as supporting evidence, not primary resolution.
+6. If no usable handle can be resolved after Steps A through C, stop early and ask for manual founder or project handles.
 
 Mark each resolved handle with provenance:
 
-- `contract metadata`
-- `official website`
+- `dexscreener`
+- `jupiter`
+- `x-search-by-ca`
 - `manual input`
-- `other public source`
 
 If the resolved handle appears to be a project or org account rather than an individual, do not stop there. Inspect its repost history to identify which individual accounts it amplifies consistently. Treat those individual accounts as founder candidates and add them to the subject list before proceeding.
 
