@@ -65,6 +65,15 @@ Create a list of accounts to inspect:
 
 Do not bloat the report with every community account.
 
+Distinguish clearly between:
+
+- `project handle`: the org, brand, or token account
+- `founder handle`: the individual behind the project
+
+Never treat a project handle as a founder handle without explicit confirmation.
+
+If only a project handle is resolved, inspect its repost history, replies, and repeated amplifications to identify which individual accounts it consistently boosts. Treat those as founder candidates, not confirmed founders, until stronger evidence exists.
+
 ### 5. Research Each Founder
 
 For each founder handle, inspect with the selected X data source:
@@ -173,5 +182,6 @@ Stop and return no Founder Check verdict when:
 - The chosen X data source is unauthenticated, rate-limited, or broken
 - X content cannot be fetched for the relevant accounts
 - No founder handles can be tied to the project after inspecting official surfaces
+- A supplied founder handle has no verifiable public presence and cannot be distinguished from a fabricated or irrelevant account
 
 In failure mode, say what was checked, which X access path failed, and whether the user should connect the X API or Apify.

@@ -118,6 +118,14 @@ Subtract for:
 
 Hard red flags can force a negative verdict even if the raw score is higher.
 
+## Special Verdict: UNRESOLVED
+
+Use `UNRESOLVED` when a founder handle is provided or inferred, but there is no verifiable public presence for that founder on X or related official surfaces.
+
+- `Score`: not applicable
+- `Confidence`: low
+- `Action`: return immediately with unknowns and ask the trader for manual verification or a stronger founder identifier
+
 ## Non-Negotiable Rules
 
 - Never invent a founder identity.
@@ -138,6 +146,12 @@ Every run should return a compact report in this shape:
 - `Score`
 - `Confidence`
 - `Data source used`
+
+When the verdict is `UNRESOLVED`, explicitly show:
+
+- `Founder Check verdict: UNRESOLVED`
+- `Score: N/A`
+- `Confidence: low`
 
 ### 2. Team Resolution
 

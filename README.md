@@ -11,6 +11,22 @@ Founder Check only works with live X account access through one of these paths:
 
 If neither is available, the skill should stop and return no verdict.
 
+## Setup
+
+Founder Check requires live X data. Connect one of:
+
+**Option A — Apify (recommended)**
+1. Create a free account at apify.com
+2. Copy your API token from Settings -> Integrations
+3. Connect the Apify MCP in your agent
+4. Free plan ($5/month credits) is enough for casual use
+5. Starter plan ($29/month) required for API-based automation
+
+**Option B — X API**
+1. Apply at developer.twitter.com
+2. Basic plan required ($100/month) - Free tier does not support timeline reads
+3. Copy your Bearer Token and configure it in your agent
+
 ## What It Looks For
 
 - Founder account history and continuity

@@ -2,3 +2,13 @@ interface:
   display_name: "Founder Check"
   short_description: "Founder intel via X API or Apify"
   default_prompt: "Use $founder-check to analyze the founders behind [CA or @handle]. Source: apify. Mode: fast."
+
+tools_required:
+  - name: "x-api"
+    description: "Live Twitter/X access via X API credentials"
+    required: false
+  - name: "apify"
+    description: "Live Twitter/X access via Apify actor"
+    required: false
+
+tools_policy: "At least one of x-api or apify must be available. If neither is connected, refuse to run and ask the user to connect one."
