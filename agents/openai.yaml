@@ -1,4 +1,4 @@
 interface:
   display_name: "Founder Check"
   short_description: "Founder intel via X API or Apify"
-  default_prompt: "Use $founder-check to vet the founders behind this token with X API or Apify access before I trade it."
+  default_prompt: "Use $founder-check to analyze the founders behind [CA or @handle]. Source: apify. Mode: fast."
