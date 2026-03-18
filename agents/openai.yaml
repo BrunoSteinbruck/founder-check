@@ -1,0 +1,4 @@
+interface:
+  display_name: "Founder Check"
+  short_description: "Team intelligence for web3 token launches"
+  default_prompt: "Use $founder-check to vet the founders behind this token before I trade it."
