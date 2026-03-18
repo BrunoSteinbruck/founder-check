@@ -18,6 +18,13 @@ Before anything else, verify that at least one supported X data source is availa
 - X API
 - Apify
 
+Preferred Apify Actor for X data:
+
+- `apify/twitter-scraper` (primary)
+- `quacker/twitter-scraper` (fallback)
+
+Do not use generic web browser collectors for X. They are commonly blocked or degraded. Use only dedicated X/Twitter Actors.
+
 If both are unavailable, stop immediately. Do not continue with social inference from web search alone.
 
 If both are available, prefer:
@@ -54,6 +61,8 @@ Mark each resolved handle with provenance:
 - `official website`
 - `manual input`
 - `other public source`
+
+If the resolved handle appears to be a project or org account rather than an individual, do not stop there. Inspect its repost history to identify which individual accounts it amplifies consistently. Treat those individual accounts as founder candidates and add them to the subject list before proceeding.
 
 ### 4. Build The Subject List
 
