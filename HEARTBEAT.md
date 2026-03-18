@@ -4,9 +4,30 @@
 
 Produce a fast, evidence-based credibility read on a token's founders or team without pretending certainty where public data is thin.
 
+The read is only valid when it is backed by live X data from one of the supported collection paths:
+
+- X API
+- Apify
+
 ## Workflow
 
-### 1. Normalize The Input
+### 1. Confirm Data Access
+
+Before anything else, verify that at least one supported X data source is available:
+
+- X API
+- Apify
+
+If both are unavailable, stop immediately. Do not continue with social inference from web search alone.
+
+If both are available, prefer:
+
+1. `x-api`
+2. `apify`
+
+Record the source selected for this run.
+
+### 2. Normalize The Input
 
 Detect whether the input contains:
 
@@ -18,7 +39,7 @@ Detect whether the input contains:
 
 If the user provides only a contract address, attempt social resolution first. If the user already provides handles, do not block on resolution.
 
-### 2. Resolve Official Socials
+### 3. Resolve Official Socials
 
 For `CA` input:
 
@@ -34,7 +55,7 @@ Mark each resolved handle with provenance:
 - `manual input`
 - `other public source`
 
-### 3. Build The Subject List
+### 4. Build The Subject List
 
 Create a list of accounts to inspect:
 
@@ -44,9 +65,9 @@ Create a list of accounts to inspect:
 
 Do not bloat the report with every community account.
 
-### 4. Research Each Founder
+### 5. Research Each Founder
 
-For each founder handle, inspect:
+For each founder handle, inspect with the selected X data source:
 
 - Bio and stated role
 - Apparent account age and continuity
@@ -57,7 +78,7 @@ For each founder handle, inspect:
 
 Prefer recent evidence plus one or two older signals proving history.
 
-### 5. Map Meaningful Network Signals
+### 6. Map Meaningful Network Signals
 
 Prioritize interactions that are difficult to fake:
 
@@ -74,7 +95,7 @@ For each signal, answer:
 3. Is the interaction meaningful or just noise?
 4. Is it relevant to this project, or only to an older context?
 
-### 6. Extract Key Tweets
+### 7. Extract Key Tweets
 
 Capture only tweets that materially change the trader's understanding:
 
@@ -85,7 +106,7 @@ Capture only tweets that materially change the trader's understanding:
 
 Avoid cluttering the result with generic hype posts.
 
-### 7. Score And Classify
+### 8. Score And Classify
 
 Use the scoring model in `SOUL.md`. Report:
 
@@ -96,15 +117,18 @@ Use the scoring model in `SOUL.md`. Report:
 Confidence should fall when:
 
 - Social resolution is uncertain
-- X access is incomplete
+- The selected X data source is incomplete
 - Most evidence comes from the project itself
 - The signal set is too new or too thin
 
-### 8. Return The Report
+If the X data source fails before the analysis is complete, abort the run and return no verdict.
+
+### 9. Return The Report
 
 Optimize for fast trade decisions:
 
 - Put the verdict first
+- State the data source used: `x-api` or `apify`
 - Make evidence scannable
 - Keep unknowns explicit
 - Separate strong positives from speculation
@@ -113,11 +137,11 @@ Optimize for fast trade decisions:
 
 Use sources in this order:
 
-1. Official X accounts and original posts
+1. Selected X data source: X API or Apify
 2. Official website, docs, GitHub, Mirror, and launch materials
 3. DexScreener or other token metadata aggregators
 4. Credible third-party accounts with direct interaction
-5. Secondary summaries only when primary sources are inaccessible
+5. Secondary summaries only when they support primary X evidence rather than replace it
 
 ## Search Patterns
 
@@ -139,13 +163,15 @@ Adapt terms to the chain or niche, for example `solana`, `base`, `ai agent`, `la
 - Treat engagement-farm accounts as low quality.
 - A large account repost without commentary is weaker than a thoughtful reply.
 - If the same signal repeats across many screenshots or mirrors, count it once.
+- Web search alone is not enough for a valid Founder Check.
 
 ## Failure Modes
 
-Return a degraded report instead of hallucinating when:
+Stop and return no Founder Check verdict when:
 
-- No founder handles can be tied to the project
-- The project social graph is mostly anonymous noise
-- X content is unavailable or rate-limited
+- No supported X data source is available
+- The chosen X data source is unauthenticated, rate-limited, or broken
+- X content cannot be fetched for the relevant accounts
+- No founder handles can be tied to the project after inspecting official surfaces
 
-In degraded mode, say what was checked, what failed, and what manual input would unblock the next pass.
+In failure mode, say what was checked, which X access path failed, and whether the user should connect the X API or Apify.

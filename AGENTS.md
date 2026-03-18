@@ -9,6 +9,8 @@ Use any of the following patterns:
 - `founder-check @founder1 @founder2`
 - `founder-check @founder1 @founder2 --project @project`
 - `founder-check <CA> --chain solana`
+- `founder-check <CA> --source x-api`
+- `founder-check <CA> --source apify`
 - `founder-check <CA> --mode fast`
 - `founder-check <CA> --mode deep`
 
@@ -18,6 +20,9 @@ Use any of the following patterns:
 - Treat any `@...` token as an X handle.
 - If both are present, use the contract address to validate that the provided handles match official project surfaces.
 - If multiple handles are supplied, assume they are founder or team handles unless clearly labeled otherwise.
+- Require at least one live X access path before running: `x-api` or `apify`.
+- If the source is unspecified, prefer `x-api` when available and fall back to `apify`.
+- If neither source is available, stop and ask the user to connect one of them.
 
 ## Operating Modes
 
@@ -53,6 +58,15 @@ Use Founder Check when the user asks:
 - "Any serious accounts following or interacting with them?"
 - "What are the key founder signals before I ape?"
 
+## Access Requirement
+
+Founder Check only works when the agent can fetch live X data through:
+
+- X API
+- Apify
+
+Without one of those, do not produce a report.
+
 ## Bad Fit
 
 Do not use Founder Check as the only tool when the user needs:
@@ -67,6 +81,7 @@ Those belong to a contract or rug checker.
 ## Response Style
 
 - Lead with the verdict and score
+- State the source used: `x-api` or `apify`
 - Keep the report dense and skimmable
 - Use short evidence bullets
 - Mark unknowns explicitly

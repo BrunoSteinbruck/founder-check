@@ -4,6 +4,11 @@
 
 Founder Check tells a trader whether the people behind a token deserve attention before the market window closes. It is not a contract auditor. It is a fast credibility and network-intelligence layer focused on founders, team accounts, and public social proof.
 
+Founder Check is only valid when the agent can inspect live X account data through one of two supported access paths:
+
+- X API
+- Apify
+
 ## Core Promise
 
 Given a contract address or one or more X handles, Founder Check returns a concise report that answers:
@@ -23,9 +28,21 @@ Founder Check should accept:
 - `CA + @handle`
 - Optional `project handle`
 - Optional `chain`
+- Optional `source`:
+  - `x-api`
+  - `apify`
 - Optional `mode`:
   - `fast`: prioritize speed, high-signal evidence only
   - `deep`: gather broader history and more cross-checks
+
+## Data Access Requirement
+
+At least one of these must be available before analysis starts:
+
+- Direct X API access
+- Apify access capable of collecting X account and post data
+
+If both are unavailable, the skill must stop immediately. No fallback report, partial verdict, or speculative conclusion is allowed.
 
 ## What Counts As High-Signal Evidence
 
@@ -107,7 +124,8 @@ Hard red flags can force a negative verdict even if the raw score is higher.
 - Never imply endorsement from a follow alone.
 - Separate `observed`, `inferred`, and `unknown`.
 - If handle resolution is uncertain, say so clearly.
-- If X access is partial, lower confidence and state the limitation.
+- Never produce a verdict without direct X data from the X API or Apify.
+- If X access is partial, incomplete, or broken, stop and report the missing access path instead of guessing.
 - Do not turn rumor into fact.
 
 ## Output Contract
@@ -119,6 +137,7 @@ Every run should return a compact report in this shape:
 - `Founder Check verdict`
 - `Score`
 - `Confidence`
+- `Data source used`
 
 ### 2. Team Resolution
 

@@ -2,6 +2,15 @@
 
 Founder Check is a web3 team-intelligence skill for traders using AI agents. It resolves founders from a contract address or accepts X handles directly, then evaluates the people behind a token through public history, network quality, and meaningful social proof.
 
+## Required X Access
+
+Founder Check only works with live X account access through one of these paths:
+
+- X API
+- Apify
+
+If neither is available, the skill should stop and return no verdict.
+
 ## What It Looks For
 
 - Founder account history and continuity
@@ -16,6 +25,7 @@ Founder Check is a web3 team-intelligence skill for traders using AI agents. It 
 - Confusing hype with credibility
 - Turning rumor into fact
 - Replacing a contract security check
+- Pretending web search alone is enough to validate X behavior
 
 ## Example Positioning
 
@@ -30,6 +40,7 @@ Use Founder Check alongside a rug checker:
 
 - `Score: 68/100`
 - `Confidence: medium`
+- `Data source used: x-api`
 - `Resolved handles: @founder, @project`
 - `Why it matters: two credible ecosystem builders replied to build updates, but founder history before this token is thin`
 - `Main risk: account is new and most validation still comes from the project's own network`
