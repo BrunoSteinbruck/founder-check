@@ -4,10 +4,12 @@
 
 Produce a fast, evidence-based credibility read on a token's founders or team without pretending certainty where public data is thin.
 
-The read is only valid when it is backed by live X data from one of the supported collection paths:
+Scored founder reads are only valid when backed by live X data from one of the supported collection paths:
 
 - X API
 - Apify
+
+When a supported X source is present but degraded, the skill may return a non-scored `PARTIAL`, `UNRESOLVED`, or `BLOCKED` report. These reports may summarize verified project identity and collection failures, but must not score founder credibility.
 
 ## Workflow
 
@@ -35,6 +37,18 @@ If both are available, prefer:
 
 Record the source selected for this run.
 
+#### Actor And Endpoint Health Check
+
+Before relying on a source, record which collection modes are available:
+
+- profile/account metadata
+- timeline/posts
+- search by contract, project name, or handle
+- tweet detail for specific URLs
+- followers/following when needed for network quality
+
+For Apify, use dedicated X/Twitter Actors only. If an actor returns empty data for the target, test whether another allowed actor or mode can fetch the same target before declaring the source broken. If a mode fails, record the failure reason and continue only with claims supported by successful modes.
+
 ### 2. Normalize The Input
 
 Detect whether the input contains:
@@ -56,7 +70,7 @@ For `CA` input:
 3. If Step B does not return a usable X handle, Step C: search X directly for the contract address string.
 4. Stop at the first step that returns a usable handle.
 5. Do not continue into websites, docs, or general web research after the handle is resolved. Those come later as supporting evidence, not primary resolution.
-6. If no usable handle can be resolved after Steps A through C, stop early and ask for manual founder or project handles.
+6. If no usable handle can be resolved after Steps A through C, return `UNRESOLVED` or `BLOCKED` depending on whether X access worked, and ask for manual founder or project handles.
 
 Mark each resolved handle with provenance:
 
@@ -66,6 +80,8 @@ Mark each resolved handle with provenance:
 - `manual input`
 
 If the resolved handle appears to be a project or org account rather than an individual, do not stop there. Inspect its repost history to identify which individual accounts it amplifies consistently. Treat those individual accounts as founder candidates and add them to the subject list before proceeding.
+
+If the project handle is resolved from official token metadata but X collection fails for that handle, do not discard the project identity evidence. Mark project identity as verified or partial based on official surfaces, mark founder identity as unknown, and return `PARTIAL` or `BLOCKED` without a founder score.
 
 ### 4. Build The Subject List
 
@@ -85,6 +101,8 @@ Distinguish clearly between:
 Never treat a project handle as a founder handle without explicit confirmation.
 
 If only a project handle is resolved, inspect its repost history, replies, and repeated amplifications to identify which individual accounts it consistently boosts. Treat those as founder candidates, not confirmed founders, until stronger evidence exists.
+
+Secondary sources, X mirrors, search snippets, and third-party summaries may be used to add candidate accounts to the subject list, but only with `candidate` provenance. They may not confirm founder status or contribute to a scored founder verdict unless direct X data later verifies them.
 
 ### 5. Research Each Founder
 
@@ -142,7 +160,13 @@ Confidence should fall when:
 - Most evidence comes from the project itself
 - The signal set is too new or too thin
 
-If the X data source fails before the analysis is complete, abort the run and return no verdict.
+Only score when direct X evidence is sufficient to evaluate founder or team credibility. If X collection is partial or broken:
+
+- Use `PARTIAL` when project identity is verified but founder identity remains unverified.
+- Use `UNRESOLVED` when founder candidates exist but cannot be verified.
+- Use `BLOCKED` when the X source, credentials, actor, rate limit, or target access prevents meaningful collection.
+- Set `Founder Score: N/A`.
+- Include data source health and what would upgrade the report.
 
 ### 9. Return The Report
 
@@ -153,16 +177,17 @@ Optimize for fast trade decisions:
 - Make evidence scannable
 - Keep unknowns explicit
 - Separate strong positives from speculation
+- Separate verified project identity from verified founder identity
 
 ## Source Priority
 
 Use sources in this order:
 
 1. Selected X data source: X API or Apify
-2. Official website, docs, GitHub, Mirror, and launch materials
+2. Official website, docs, GitHub, and launch materials
 3. DexScreener or other token metadata aggregators
 4. Credible third-party accounts with direct interaction
-5. Secondary summaries only when they support primary X evidence rather than replace it
+5. Secondary summaries and X mirrors only for candidate discovery or context; never as replacement for direct X evidence
 
 ## Search Patterns
 
@@ -184,16 +209,21 @@ Adapt terms to the chain or niche, for example `solana`, `base`, `ai agent`, `la
 - Treat engagement-farm accounts as low quality.
 - A large account repost without commentary is weaker than a thoughtful reply.
 - If the same signal repeats across many screenshots or mirrors, count it once.
-- Web search alone is not enough for a valid Founder Check.
+- Web search alone is not enough for a scored Founder Check.
+- Do not merge project identity confidence into founder identity confidence.
+- Use evidence labels: `observed`, `inferred`, `candidate`, and `unknown`.
 
 ## Failure Modes
 
-Stop and return no Founder Check verdict when:
+Stop and return no Founder Check report when:
 
 - No supported X data source is available
-- The chosen X data source is unauthenticated, rate-limited, or broken
-- X content cannot be fetched for the relevant accounts
-- No founder handles can be tied to the project after inspecting official surfaces
+
+Return a non-scored Founder Check report when:
+
+- The chosen X data source is authenticated but partially broken
+- X content cannot be fetched for some or all relevant accounts, but project identity can still be verified from official surfaces
+- No founder handles can be tied to the project after inspecting official surfaces, but the token/project identity is verified
 - A supplied founder handle has no verifiable public presence and cannot be distinguished from a fabricated or irrelevant account
 
-In failure mode, say what was checked, which X access path failed, and whether the user should connect the X API or Apify.
+In failure or degraded mode, say what was checked, which X access path failed, which collection modes succeeded, and whether the user should connect the X API, try a different Apify actor, or provide stronger founder identifiers.

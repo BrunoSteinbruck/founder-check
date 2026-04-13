@@ -60,12 +60,20 @@ Use Founder Check when the user asks:
 
 ## Access Requirement
 
-Founder Check only works when the agent can fetch live X data through:
+Scored Founder Check verdicts only work when the agent can fetch live X data through:
 
 - X API
 - Apify
 
 Without one of those, do not produce a report.
+
+If one of those exists but collection is degraded, produce a non-scored report instead of guessing:
+
+- `PARTIAL`: project identity is verified, founder identity is not verified
+- `UNRESOLVED`: founder candidates exist but cannot be verified
+- `BLOCKED`: X source or actor failed before meaningful founder collection
+
+Always set `Founder Score: N/A` for these verdicts.
 
 ## Bad Fit
 
@@ -86,3 +94,5 @@ Those belong to a contract or rug checker.
 - Use short evidence bullets
 - Mark unknowns explicitly
 - Avoid overstating weak signals
+- Separate project identity confidence from founder identity confidence
+- Include data source health when X collection is partial, empty, or broken

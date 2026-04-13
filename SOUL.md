@@ -44,6 +44,8 @@ At least one of these must be available before analysis starts:
 
 If both are unavailable, the skill must stop immediately. No fallback report, partial verdict, or speculative conclusion is allowed.
 
+If a supported X data source is available but partially fails during collection, do not fabricate a founder score. Instead, return a degraded report with one of the non-scored verdicts below. Degraded reports may preserve verified project identity, official links, actor health, candidate accounts, and next checks, but they must not claim a founder is verified without direct X evidence.
+
 ## What Counts As High-Signal Evidence
 
 High-signal evidence is hard to fake, relevant to the current project, and attributable to a real source.
@@ -118,23 +120,62 @@ Subtract for:
 
 Hard red flags can force a negative verdict even if the raw score is higher.
 
-## Special Verdict: UNRESOLVED
+## Special Verdicts
+
+Use non-scored verdicts when the evidence is useful but not sufficient for a scored founder verdict.
+
+### PARTIAL
+
+Use `PARTIAL` when project identity is verified through official surfaces, but founder or team identity cannot be fully verified through direct X data.
+
+- `Founder Score`: N/A
+- `Project identity confidence`: low, medium, or high
+- `Founder identity confidence`: low
+- `Action`: report verified project surfaces, candidate team accounts, and exactly what would upgrade the check
+
+### UNRESOLVED
 
 Use `UNRESOLVED` when a founder handle is provided or inferred, but there is no verifiable public presence for that founder on X or related official surfaces.
 
-- `Score`: not applicable
+- `Founder Score`: N/A
 - `Confidence`: low
 - `Action`: return immediately with unknowns and ask the trader for manual verification or a stronger founder identifier
+
+### BLOCKED
+
+Use `BLOCKED` when a supported X data source exists, but the selected actors, credentials, rate limits, or target access fail before enough X evidence can be collected.
+
+- `Founder Score`: N/A
+- `Confidence`: low
+- `Action`: report which X access path and collection modes failed, plus any verified non-X project identity evidence
+
+### HIGH RISK
+
+Use `HIGH RISK` when direct evidence shows serious founder or team red flags, even if some categories would otherwise score well.
 
 ## Non-Negotiable Rules
 
 - Never invent a founder identity.
 - Never imply endorsement from a follow alone.
 - Separate `observed`, `inferred`, and `unknown`.
+- Separate `verified project identity` from `verified founder identity`.
 - If handle resolution is uncertain, say so clearly.
-- Never produce a verdict without direct X data from the X API or Apify.
-- If X access is partial, incomplete, or broken, stop and report the missing access path instead of guessing.
+- Never produce a scored founder verdict without direct X data from the X API or Apify.
+- If X access is partial, incomplete, or broken, use `PARTIAL`, `UNRESOLVED`, or `BLOCKED` instead of scoring.
 - Do not turn rumor into fact.
+- Secondary sources may identify candidate accounts, but they may not prove founder status.
+- Every material claim should be framed as `observed`, `inferred`, `candidate`, or `unknown`.
+
+## Evidence Ladder
+
+Use this ladder to decide what claims are allowed:
+
+- `observed`: directly fetched from X API, Apify X data, official token metadata, official website, docs, GitHub, or exchange/listing surfaces
+- `inferred`: a cautious conclusion from multiple observed sources, clearly labeled as inference
+- `candidate`: a possible founder, team, or project account discovered from secondary mirrors, repost patterns, search results, or ambiguous official context
+- `unknown`: not confirmed, failed to fetch, or not enough evidence
+
+Secondary sources and mirrors are allowed only for candidate discovery or supporting context. They cannot create a scored founder verdict by themselves.
 
 ## Output Contract
 
@@ -143,14 +184,22 @@ Every run should return a compact report in this shape:
 ### 1. Verdict
 
 - `Founder Check verdict`
-- `Score`
+- `Founder Score`
 - `Confidence`
 - `Data source used`
 
-When the verdict is `UNRESOLVED`, explicitly show:
+For scored verdicts, include:
 
-- `Founder Check verdict: UNRESOLVED`
-- `Score: N/A`
+- `Founder Check verdict: STRONG / PROMISING / MIXED / LOW TRUST / HIGH RISK`
+- `Founder Score: 0-100`
+- `Confidence: high / medium / low`
+
+For non-scored verdicts, explicitly show:
+
+- `Founder Check verdict: PARTIAL / UNRESOLVED / BLOCKED`
+- `Founder Score: N/A`
+- `Project identity confidence: high / medium / low / unknown`
+- `Founder identity confidence: high / medium / low / unknown`
 - `Confidence: low`
 
 ### 2. Team Resolution
@@ -158,13 +207,23 @@ When the verdict is `UNRESOLVED`, explicitly show:
 - Resolved founder handles
 - Project handle
 - Whether handles came from the contract metadata, official site, or manual input
+- Candidate team accounts and provenance, if any
 
-### 3. Why It Matters
+### 3. Verified Project Identity
+
+For contract-address runs, separate project identity from founder identity:
+
+- Token name, symbol, chain, and contract
+- Official website, docs, app, GitHub, or exchange/listing surfaces
+- Official project X handle, with provenance
+- Whether project identity is verified, partial, or unknown
+
+### 4. Why It Matters
 
 - 3 to 5 bullet points with the highest-signal positive evidence
 - 3 to 5 bullet points with the highest-signal risks
 
-### 4. Key Network Signals
+### 5. Key Network Signals
 
 For each meaningful signal, capture:
 
@@ -173,7 +232,7 @@ For each meaningful signal, capture:
 - Why the source account matters
 - Why the signal matters
 
-### 5. Key Tweets
+### 6. Key Tweets
 
 Include the most important public posts only:
 
@@ -182,7 +241,7 @@ Include the most important public posts only:
 - Builder update
 - Any defensive or clarifying tweet during a controversy
 
-### 6. Founder Breakdown
+### 7. Founder Breakdown
 
 Per founder:
 
@@ -192,7 +251,16 @@ Per founder:
 - `Best evidence`
 - `Main concern`
 
-### 7. Unknowns
+### 8. Data Source Health
+
+For every run, briefly state:
+
+- X source selected
+- Collection modes attempted: profile, timeline, search, tweet detail, followers/following when relevant
+- Which modes succeeded, returned empty data, were rate-limited, or failed
+- Whether failures affected the verdict
+
+### 9. Unknowns
 
 - What could not be confirmed
 - What to check next if the trader wants deeper diligence
